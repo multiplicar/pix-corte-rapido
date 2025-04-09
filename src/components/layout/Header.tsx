@@ -1,8 +1,20 @@
 
 import { Link } from 'react-router-dom';
-import { Scissors } from 'lucide-react';
+import { Scissors, UserRound } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    // Verificar se o cliente está logado
+    const clienteData = localStorage.getItem('cliente');
+    if (clienteData) {
+      const cliente = JSON.parse(clienteData);
+      setIsLoggedIn(cliente.isLoggedIn || false);
+    }
+  }, []);
+
   return (
     <header className="bg-barber-primary text-white py-4 shadow-md sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center px-4">
@@ -23,12 +35,24 @@ const Header = () => {
           </Link>
         </nav>
         
-        <Link 
-          to="/agendar"
-          className="bg-barber-red hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
-        >
-          Agendar Agora
-        </Link>
+        <div className="flex items-center space-x-4">
+          <Link 
+            to={isLoggedIn ? "/cliente/perfil" : "/cliente/login"}
+            className="flex items-center space-x-1 hover:text-barber-accent transition-colors"
+          >
+            <UserRound className="h-5 w-5" />
+            <span className="hidden sm:inline">
+              {isLoggedIn ? "Minha Conta" : "Entrar"}
+            </span>
+          </Link>
+          
+          <Link 
+            to="/agendar"
+            className="bg-barber-red hover:bg-red-700 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            Agendar Agora
+          </Link>
+        </div>
       </div>
     </header>
   );
