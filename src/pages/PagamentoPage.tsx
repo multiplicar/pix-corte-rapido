@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
@@ -7,6 +6,7 @@ import { useApp } from "@/contexts/AppContext";
 import { formatCurrency, generateFakePixCode } from "@/lib/utils";
 import { CalendarIcon, Copy, CheckCircle, ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import QRCodePix from "@/components/payment/QRCodePix";
 
 const PagamentoPage = () => {
   const { agendamento, pixCode, setPixCode } = useApp();
@@ -18,7 +18,6 @@ const PagamentoPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Verificar se tem todas as informações necessárias
     if (!agendamento.servico || !agendamento.data || !agendamento.hora || !agendamento.nome || !agendamento.telefone || !agendamento.email) {
       toast({
         title: "Informações incompletas",
@@ -29,11 +28,9 @@ const PagamentoPage = () => {
       return;
     }
     
-    // Simular geração do código PIX (fake)
     const generatePix = async () => {
       setIsLoading(true);
       
-      // Na implementação real, aqui teríamos a chamada para a API do Mercado Pago
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
       if (agendamento.servico) {
@@ -50,7 +47,6 @@ const PagamentoPage = () => {
       setIsLoading(false);
     }
     
-    // Countdown timer
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -84,13 +80,11 @@ const PagamentoPage = () => {
   };
   
   const handleSimulatePayment = () => {
-    // Simular pagamento realizado com sucesso
     toast({
       title: "Pagamento confirmado!",
       description: "Seu agendamento foi confirmado com sucesso.",
     });
     
-    // Navegar para a página de sucesso
     navigate("/sucesso");
   };
   
@@ -110,7 +104,6 @@ const PagamentoPage = () => {
               </div>
             ) : (
               <>
-                {/* Resumo do agendamento */}
                 <div className="mb-6 pb-6 border-b">
                   <h2 className="text-xl font-semibold mb-4">Resumo do Agendamento</h2>
                   
@@ -148,7 +141,6 @@ const PagamentoPage = () => {
                   )}
                 </div>
                 
-                {/* Instruções PIX */}
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-4">
                     Instruções de Pagamento
@@ -178,54 +170,55 @@ const PagamentoPage = () => {
                   </div>
                 </div>
                 
-                {/* Código PIX */}
-                <div className="mb-6">
-                  <div className="bg-gray-100 p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold">Código PIX:</h3>
-                      <div className="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">
-                        Expira em {formatTime(countdown)}
-                      </div>
+                <div className="flex flex-col md:flex-row md:space-x-6 mb-6">
+                  {agendamento.servico && (
+                    <div className="flex-1 mb-6 md:mb-0">
+                      <QRCodePix 
+                        pixCode={pixCode} 
+                        value={agendamento.servico.preco} 
+                      />
                     </div>
-                    
-                    <div className="relative">
-                      <div className="border bg-white p-3 rounded text-sm font-mono break-all">
-                        {pixCode}
+                  )}
+                  
+                  <div className="flex-1">
+                    <div className="bg-gray-100 p-4 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="font-semibold">Código PIX:</h3>
+                        <div className="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                          Expira em {formatTime(countdown)}
+                        </div>
                       </div>
+                      
+                      <div className="relative">
+                        <div className="border bg-white p-3 rounded text-sm font-mono break-all">
+                          {pixCode}
+                        </div>
+                        <Button
+                          onClick={handleCopyPix}
+                          className="absolute right-2 top-2 p-1 h-auto"
+                          variant="ghost"
+                          size="sm"
+                        >
+                          {copied ? (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          ) : (
+                            <Copy className="h-5 w-5" />
+                          )}
+                        </Button>
+                      </div>
+                      
                       <Button
                         onClick={handleCopyPix}
-                        className="absolute right-2 top-2 p-1 h-auto"
-                        variant="ghost"
+                        className="w-full mt-3 bg-barber-accent hover:bg-amber-600 text-black"
                         size="sm"
                       >
-                        {copied ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Copy className="h-5 w-5" />
-                        )}
+                        {copied ? "Código Copiado" : "Copiar Código PIX"}
                       </Button>
                     </div>
                   </div>
                 </div>
                 
-                {/* Botões de ação */}
                 <div className="flex flex-col space-y-3">
-                  <Button
-                    onClick={handleCopyPix}
-                    className="bg-barber-accent hover:bg-amber-600 text-black"
-                    size="lg"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckCircle className="h-5 w-5 mr-2" /> Código Copiado
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-5 w-5 mr-2" /> Copiar Código PIX
-                      </>
-                    )}
-                  </Button>
-                  
                   <Button
                     onClick={() => navigate("/confirmar")}
                     variant="outline"
@@ -234,7 +227,6 @@ const PagamentoPage = () => {
                     <ArrowLeft className="h-4 w-4 mr-2" /> Voltar
                   </Button>
                   
-                  {/* Este botão é apenas para simular o pagamento na demonstração */}
                   <Button
                     onClick={handleSimulatePayment}
                     variant="link"
