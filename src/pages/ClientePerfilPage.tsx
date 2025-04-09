@@ -5,8 +5,11 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, ClipboardList, UserRound, LogOut } from 'lucide-react';
+import { Calendar, ClipboardList, UserRound, LogOut, Timer } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useApp, WaitListItem } from '@/contexts/AppContext';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 interface Cliente {
   nome?: string;
@@ -17,15 +20,28 @@ interface Cliente {
 const ClientePerfilPage = () => {
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [clientWaitInfo, setClientWaitInfo] = useState<WaitListItem | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { waitList } = useApp();
 
   useEffect(() => {
     // Verificar se o cliente está logado
     const clienteData = localStorage.getItem('cliente');
     
     if (clienteData) {
-      setCliente(JSON.parse(clienteData));
+      const clienteObj = JSON.parse(clienteData);
+      setCliente(clienteObj);
+      
+      // Verificar se o cliente está na fila de espera
+      if (clienteObj.email) {
+        const waitItem = waitList.find(item => item.email === clienteObj.email);
+        if (waitItem) {
+          setClientWaitInfo(waitItem);
+        } else {
+          setClientWaitInfo(null);
+        }
+      }
     } else {
       // Redirecionar para a página de login se não estiver logado
       navigate('/cliente/login');
@@ -37,7 +53,7 @@ const ClientePerfilPage = () => {
     }
     
     setIsLoading(false);
-  }, [navigate, toast]);
+  }, [navigate, toast, waitList]);
 
   const handleLogout = () => {
     localStorage.removeItem('cliente');
@@ -46,6 +62,25 @@ const ClientePerfilPage = () => {
       description: "Você saiu da sua conta com sucesso.",
     });
     navigate('/');
+  };
+
+  const formatTimeEstimate = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} minutos`;
+    }
+    
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    return `${hours} ${hours === 1 ? 'hora' : 'horas'}${mins > 0 ? ` e ${mins} minutos` : ''}`;
+  };
+
+  const handleCheckWaitList = () => {
+    if (clientWaitInfo) {
+      navigate(`/fila-espera?id=${clientWaitInfo.id}`);
+    } else {
+      navigate('/fila-espera');
+    }
   };
 
   if (isLoading) {
@@ -83,6 +118,26 @@ const ClientePerfilPage = () => {
             </Button>
           </div>
 
+          {clientWaitInfo && (
+            <Alert className="mb-6 border-barber-accent bg-amber-50">
+              <Timer className="h-4 w-4 text-barber-accent" />
+              <AlertTitle className="flex items-center">
+                Fila de Espera 
+                <Badge className="ml-2 bg-barber-primary">{clientWaitInfo.posicao}º na fila</Badge>
+              </AlertTitle>
+              <AlertDescription>
+                <p>Você está na fila para {clientWaitInfo.servico.nome}.</p>
+                <Button
+                  variant="link"
+                  onClick={handleCheckWaitList}
+                  className="p-0 h-auto text-barber-primary"
+                >
+                  Ver detalhes da fila
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Tabs defaultValue="perfil" className="w-full">
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="perfil" className="flex items-center gap-2">
@@ -119,9 +174,18 @@ const ClientePerfilPage = () => {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
                   <Button className="bg-barber-accent hover:bg-amber-600 text-black">
                     Editar Perfil
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={handleCheckWaitList}
+                  >
+                    <Timer className="h-4 w-4" />
+                    {clientWaitInfo ? "Ver sua posição na fila" : "Consultar fila de espera"}
                   </Button>
                 </CardFooter>
               </Card>

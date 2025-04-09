@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Scissors, UserRound } from 'lucide-react';
+import { Scissors, UserRound, Timer } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const Header = () => {
@@ -32,6 +32,10 @@ const Header = () => {
           </Link>
           <Link to="/agendar" className="hover:text-barber-accent transition-colors">
             Agendar
+          </Link>
+          <Link to="/fila-espera" className="hover:text-barber-accent transition-colors flex items-center">
+            <Timer className="h-4 w-4 mr-1" />
+            Fila de Espera
           </Link>
         </nav>
         

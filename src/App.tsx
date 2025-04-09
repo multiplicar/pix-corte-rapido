@@ -13,6 +13,7 @@ import SucessoPage from "./pages/SucessoPage";
 import NotFound from "./pages/NotFound";
 import ClienteLoginPage from "./pages/ClienteLoginPage";
 import ClientePerfilPage from "./pages/ClientePerfilPage";
+import FilaEsperaPage from "./pages/FilaEsperaPage";
 import { AppProvider } from "./contexts/AppContext";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/sucesso" element={<SucessoPage />} />
             <Route path="/cliente/login" element={<ClienteLoginPage />} />
             <Route path="/cliente/perfil" element={<ClientePerfilPage />} />
+            <Route path="/fila-espera" element={<FilaEsperaPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
