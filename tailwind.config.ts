@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,6 +25,13 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				barber: {
+					primary: '#1a1a1a',     // Deep black
+					secondary: '#8B4513',   // Saddle brown
+					accent: '#D4AF37',      // Gold/bronze
+					light: '#F5F5F5',       // Off-white
+					red: '#BC2A26',         // Classic barbershop red
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
