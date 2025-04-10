@@ -11,19 +11,19 @@ const PaymentInstructions: React.FC = () => {
       <div className="space-y-4 text-gray-700">
         <p className="flex items-start">
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">1</span>
-          Copie o código PIX abaixo.
+          Você será redirecionado para o ambiente seguro do Mercado Pago.
         </p>
         <p className="flex items-start">
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">2</span>
-          Abra o aplicativo do seu banco ou carteira digital.
+          Escolha a forma de pagamento PIX.
         </p>
         <p className="flex items-start">
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">3</span>
-          Escolha a opção PIX e selecione "Pix Copia e Cola".
+          Escaneie o QR code ou copie o código PIX gerado.
         </p>
         <p className="flex items-start">
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">4</span>
-          Cole o código e confirme o pagamento.
+          Realize o pagamento no app do seu banco.
         </p>
         <p className="flex items-start">
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">5</span>
