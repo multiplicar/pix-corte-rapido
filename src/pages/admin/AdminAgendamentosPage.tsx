@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ import { toast } from 'sonner';
 import { Calendar, ClipboardCheck, ClipboardX, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-// Tipo para o agendamento
 interface Agendamento {
   id: string;
   cliente: {
@@ -24,7 +22,6 @@ interface Agendamento {
 }
 
 const AdminAgendamentosPage = () => {
-  // Estado para a lista de agendamentos
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>(() => {
     const hoje = new Date().toISOString().split('T')[0];
     return [
@@ -37,10 +34,8 @@ const AdminAgendamentosPage = () => {
     ];
   });
   
-  // Estado para pesquisa
   const [pesquisa, setPesquisa] = useState('');
   
-  // Cancelar agendamento
   const handleCancelar = (id: string) => {
     setAgendamentos(
       agendamentos.map(agendamento =>
@@ -52,7 +47,6 @@ const AdminAgendamentosPage = () => {
     toast.success('Agendamento cancelado com sucesso!');
   };
   
-  // Confirmar agendamento como concluído
   const handleConcluir = (id: string) => {
     setAgendamentos(
       agendamentos.map(agendamento =>
@@ -64,16 +58,13 @@ const AdminAgendamentosPage = () => {
     toast.success('Agendamento marcado como concluído!');
   };
   
-  // Filtrar agendamentos por status e pesquisa
   const filtrarAgendamentos = (status: 'agendado' | 'concluido' | 'cancelado' | 'todos') => {
     let filtrados = agendamentos;
     
-    // Filtrar por status se não for 'todos'
     if (status !== 'todos') {
       filtrados = filtrados.filter(a => a.status === status);
     }
     
-    // Filtrar por pesquisa
     if (pesquisa) {
       const termoPesquisa = pesquisa.toLowerCase();
       filtrados = filtrados.filter(a => 

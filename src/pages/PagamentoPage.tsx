@@ -1,12 +1,15 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/contexts/AppContext";
-import { formatCurrency, generateFakePixCode } from "@/lib/utils";
-import { CalendarIcon, Copy, CheckCircle, ArrowLeft } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { createPixPayment, checkPaymentStatus } from "@/lib/mercadoPago";
+import { CalendarIcon, Copy, CheckCircle, ArrowLeft, AlertTriangle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import QRCodePix from "@/components/payment/QRCodePix";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const PagamentoPage = () => {
   const { agendamento, pixCode, setPixCode } = useApp();
@@ -16,7 +19,11 @@ const PagamentoPage = () => {
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(900); // 15 minutes in seconds
   const [isLoading, setIsLoading] = useState(true);
+  const [paymentId, setPaymentId] = useState<string>('');
+  const [paymentStatus, setPaymentStatus] = useState<'pending' | 'approved' | 'rejected' | 'error'>('pending');
+  const [error, setError] = useState<string | null>(null);
   
+  // Initialize payment when component mounts
   useEffect(() => {
     if (!agendamento.servico || !agendamento.data || !agendamento.hora || !agendamento.nome || !agendamento.telefone || !agendamento.email) {
       toast({
@@ -28,25 +35,51 @@ const PagamentoPage = () => {
       return;
     }
     
-    const generatePix = async () => {
+    const initializePayment = async () => {
       setIsLoading(true);
+      setError(null);
       
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      if (agendamento.servico) {
-        const code = generateFakePixCode(agendamento.servico.preco);
-        setPixCode(code);
+      if (agendamento.servico && agendamento.nome && agendamento.email) {
+        try {
+          const description = `Agendamento: ${agendamento.servico.nome} - ${agendamento.data?.toLocaleDateString('pt-BR')} às ${agendamento.hora}`;
+          
+          const pixData = await createPixPayment(
+            agendamento.servico.preco,
+            description,
+            agendamento.email,
+            agendamento.nome
+          );
+          
+          if (pixData && pixData.qr_code) {
+            setPixCode(pixData.qr_code);
+            setPaymentId(pixData.id);
+          } else {
+            setError("Não foi possível gerar o código PIX. Verifique as configurações do Mercado Pago.");
+            // Fall back to fake PIX if Mercado Pago integration fails
+            const fakePix = generateFakePixCode(agendamento.servico.preco);
+            setPixCode(fakePix);
+          }
+        } catch (err) {
+          console.error("Error generating PIX:", err);
+          setError("Erro ao gerar o PIX. Por favor, tente novamente mais tarde.");
+          
+          // Fall back to fake PIX
+          const fakePix = generateFakePixCode(agendamento.servico.preco);
+          setPixCode(fakePix);
+        }
       }
       
       setIsLoading(false);
     };
     
+    // Only generate a new PIX if we don't have one yet
     if (!pixCode && agendamento.servico) {
-      generatePix();
+      initializePayment();
     } else {
       setIsLoading(false);
     }
     
+    // Initialize countdown
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -59,6 +92,32 @@ const PagamentoPage = () => {
     
     return () => clearInterval(timer);
   }, [agendamento, pixCode, setPixCode, navigate, toast]);
+  
+  // Check payment status periodically
+  useEffect(() => {
+    if (!paymentId) return;
+    
+    const checkStatus = async () => {
+      const status = await checkPaymentStatus(paymentId);
+      setPaymentStatus(status);
+      
+      if (status === 'approved') {
+        toast({
+          title: "Pagamento confirmado!",
+          description: "Seu agendamento foi confirmado com sucesso.",
+        });
+        navigate("/sucesso");
+      }
+    };
+    
+    // Check immediately
+    checkStatus();
+    
+    // Then check every 10 seconds
+    const intervalId = setInterval(checkStatus, 10000);
+    
+    return () => clearInterval(intervalId);
+  }, [paymentId, toast, navigate]);
   
   const handleCopyPix = () => {
     if (pixCode) {
@@ -88,6 +147,42 @@ const PagamentoPage = () => {
     navigate("/sucesso");
   };
   
+  const handleRefreshPaymentStatus = async () => {
+    if (!paymentId) return;
+    
+    toast({
+      title: "Verificando pagamento...",
+      description: "Aguarde enquanto verificamos o status do seu pagamento.",
+    });
+    
+    const status = await checkPaymentStatus(paymentId);
+    setPaymentStatus(status);
+    
+    if (status === 'approved') {
+      toast({
+        title: "Pagamento confirmado!",
+        description: "Seu agendamento foi confirmado com sucesso.",
+      });
+      navigate("/sucesso");
+    } else if (status === 'pending') {
+      toast({
+        title: "Pagamento pendente",
+        description: "Ainda não identificamos seu pagamento. Tente novamente em alguns instantes.",
+      });
+    } else {
+      toast({
+        title: "Problema no pagamento",
+        description: "Houve um problema ao verificar seu pagamento. Por favor, tente novamente.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Fallback function for generating fake PIX code (in case Mercado Pago fails)
+  const generateFakePixCode = (valor: number): string => {
+    return `00020126330014BR.GOV.BCB.PIX0111123456789012520400005303986540${valor.toFixed(2).replace('.', '')}5802BR5913Barber Shop6008Sao Paulo62150511${Math.floor(Math.random() * 10000000000)}6304${Math.floor(Math.random() * 10000)}`;
+  };
+  
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
@@ -104,6 +199,16 @@ const PagamentoPage = () => {
               </div>
             ) : (
               <>
+                {error && (
+                  <Alert variant="destructive" className="mb-6">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Atenção</AlertTitle>
+                    <AlertDescription>
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
                 <div className="mb-6 pb-6 border-b">
                   <h2 className="text-xl font-semibold mb-4">Resumo do Agendamento</h2>
                   
@@ -175,7 +280,9 @@ const PagamentoPage = () => {
                     <div className="flex-1 mb-6 md:mb-0">
                       <QRCodePix 
                         pixCode={pixCode} 
-                        value={agendamento.servico.preco} 
+                        value={agendamento.servico.preco}
+                        paymentId={paymentId}
+                        onRefresh={handleRefreshPaymentStatus}
                       />
                     </div>
                   )}
