@@ -14,6 +14,11 @@ import NotFound from "./pages/NotFound";
 import ClienteLoginPage from "./pages/ClienteLoginPage";
 import ClientePerfilPage from "./pages/ClientePerfilPage";
 import FilaEsperaPage from "./pages/FilaEsperaPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminServicosPage from "./pages/admin/AdminServicosPage";
+import AdminAgendamentosPage from "./pages/admin/AdminAgendamentosPage";
+import AdminConfigPage from "./pages/admin/AdminConfigPage";
 import { AppProvider } from "./contexts/AppContext";
 
 const queryClient = new QueryClient();
@@ -26,6 +31,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Rotas de Cliente */}
             <Route path="/" element={<HomePage />} />
             <Route path="/servicos" element={<ServicosPage />} />
             <Route path="/agendar" element={<AgendamentoPage />} />
@@ -35,6 +41,15 @@ const App = () => (
             <Route path="/cliente/login" element={<ClienteLoginPage />} />
             <Route path="/cliente/perfil" element={<ClientePerfilPage />} />
             <Route path="/fila-espera" element={<FilaEsperaPage />} />
+            
+            {/* Rotas de Administração */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/servicos" element={<AdminServicosPage />} />
+            <Route path="/admin/agendamentos" element={<AdminAgendamentosPage />} />
+            <Route path="/admin/config" element={<AdminConfigPage />} />
+            
+            {/* Rota de Erro */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

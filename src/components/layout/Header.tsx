@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Scissors, UserRound, Timer } from 'lucide-react';
+import { Scissors, UserRound, Timer, Settings } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const Header = () => {
@@ -48,6 +48,15 @@ const Header = () => {
             <span className="hidden sm:inline">
               {isLoggedIn ? "Minha Conta" : "Entrar"}
             </span>
+          </Link>
+          
+          <Link 
+            to="/admin/login"
+            className="flex items-center space-x-1 hover:text-barber-accent transition-colors"
+            title="Área do Administrador"
+          >
+            <Settings className="h-5 w-5" />
+            <span className="hidden sm:inline">Admin</span>
           </Link>
           
           <Link 
