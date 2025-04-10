@@ -1,7 +1,7 @@
 
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Users, ScissorsLinear, DollarSign } from 'lucide-react';
+import { Calendar, Users, Scissors, DollarSign } from 'lucide-react';
 
 const AdminDashboardPage = () => {
   return (
@@ -36,7 +36,7 @@ const AdminDashboardPage = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Serviços Oferecidos</CardTitle>
-              <ScissorsLinear className="h-4 w-4 text-muted-foreground" />
+              <Scissors className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">7</div>
