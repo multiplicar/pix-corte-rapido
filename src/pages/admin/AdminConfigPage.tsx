@@ -1,13 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, CreditCard, Store, Clock } from 'lucide-react';
+import { Eye, EyeOff, CreditCard, Store, Clock, AlertTriangle, Link, ExternalLink } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { isMercadoPagoConfigured } from '@/lib/mercadoPago';
 
 const AdminConfigPage = () => {
   // Estado para as configurações de pagamento do Mercado Pago
@@ -33,6 +35,9 @@ const AdminConfigPage = () => {
     intervaloAgendamento: '30',
   });
   
+  // Estado para verificar se o Mercado Pago está configurado
+  const [isMPConfigured, setIsMPConfigured] = useState(false);
+  
   // Carregar configurações do localStorage
   useEffect(() => {
     const savedMercadoPago = localStorage.getItem('mercadoPagoConfig');
@@ -44,6 +49,9 @@ const AdminConfigPage = () => {
     if (savedConfigLoja) {
       setConfigLoja(JSON.parse(savedConfigLoja));
     }
+    
+    // Verifica se o Mercado Pago está configurado
+    setIsMPConfigured(isMercadoPagoConfigured());
   }, []);
   
   // Manipular mudanças nas credenciais do Mercado Pago
@@ -57,8 +65,15 @@ const AdminConfigPage = () => {
   
   // Salvar configurações do Mercado Pago
   const handleSaveMercadoPago = () => {
+    // Verifica se todos os campos obrigatórios estão preenchidos
+    if (!mercadoPagoConfig.publicKey || !mercadoPagoConfig.accessToken || !mercadoPagoConfig.apiKey) {
+      toast.error('Por favor, preencha todas as credenciais do Mercado Pago');
+      return;
+    }
+    
     localStorage.setItem('mercadoPagoConfig', JSON.stringify(mercadoPagoConfig));
     toast.success('Credenciais do Mercado Pago salvas com sucesso!');
+    setIsMPConfigured(true);
   };
   
   // Manipular mudanças nas configurações da loja
@@ -82,6 +97,10 @@ const AdminConfigPage = () => {
       ...prev,
       [field]: !prev[field]
     }));
+  };
+  
+  const openMercadoPagoDocsInNewTab = () => {
+    window.open('https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/integrate-checkout-pro', '_blank');
   };
 
   return (
@@ -112,10 +131,33 @@ const AdminConfigPage = () => {
                 <CardTitle>Credenciais do Mercado Pago</CardTitle>
                 <CardDescription>
                   Configure suas credenciais do Mercado Pago para processar pagamentos. 
-                  Estas informações são salvas localmente e são necessárias para receber pagamentos.
+                  Estas informações são necessárias para receber pagamentos PIX e são salvas localmente.
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {!isMPConfigured && (
+                  <Alert variant="warning" className="mb-4">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertTitle>Configuração necessária</AlertTitle>
+                    <AlertDescription>
+                      As credenciais do Mercado Pago não estão configuradas. Os clientes não poderão realizar 
+                      pagamentos via PIX até que essas credenciais sejam configuradas.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                
+                <div className="flex justify-end mb-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={openMercadoPagoDocsInNewTab}
+                    className="flex items-center text-xs"
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Documentação do Mercado Pago
+                  </Button>
+                </div>
+                
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="publicKey">Chave Pública</Label>
@@ -127,7 +169,8 @@ const AdminConfigPage = () => {
                       onChange={handleMercadoPagoChange}
                     />
                     <p className="text-xs text-muted-foreground">
-                      A chave pública é usada para integração no frontend
+                      A chave pública é usada para integração no frontend. Você pode encontrá-la nas configurações 
+                      da sua conta do Mercado Pago, na seção de Credenciais.
                     </p>
                   </div>
                   
@@ -157,7 +200,8 @@ const AdminConfigPage = () => {
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      A chave de API é usada para autenticar requisições ao Mercado Pago
+                      A chave de API é usada para autenticar requisições ao Mercado Pago. Você encontra esta chave 
+                      no Painel de Desenvolvedores do Mercado Pago.
                     </p>
                   </div>
                   
@@ -187,7 +231,8 @@ const AdminConfigPage = () => {
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      O token de acesso é necessário para processar pagamentos
+                      O token de acesso é necessário para processar pagamentos. Este é o token privado que você pode 
+                      encontrar na seção de Credenciais da sua conta de Mercado Pago.
                     </p>
                   </div>
                   
@@ -199,6 +244,13 @@ const AdminConfigPage = () => {
                   </Button>
                 </div>
               </CardContent>
+              <CardFooter className="flex flex-col">
+                <p className="text-xs text-muted-foreground mt-4">
+                  <strong>Como obter credenciais:</strong> Acesse sua conta do Mercado Pago, vá para o painel de desenvolvedores 
+                  e crie uma aplicação para gerar estas chaves. Você precisará destas credenciais para processar 
+                  pagamentos via PIX.
+                </p>
+              </CardFooter>
             </Card>
           </TabsContent>
           

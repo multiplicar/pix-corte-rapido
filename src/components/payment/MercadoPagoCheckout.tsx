@@ -5,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { getMercadoPagoConfig } from '@/lib/mercadoPago';
 import PaymentLoader from './PaymentLoader';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 interface MercadoPagoCheckoutProps {
   servico?: { nome: string; preco: number };
@@ -26,6 +28,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
+  const [configError, setConfigError] = useState(false);
   const [checkoutButtonRef, setCheckoutButtonRef] = useState<HTMLDivElement | null>(null);
   
   useEffect(() => {
@@ -33,11 +36,8 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       const config = getMercadoPagoConfig();
       
       if (!config || !config.publicKey) {
-        toast({
-          title: "Erro na configuração",
-          description: "Configuração do Mercado Pago não encontrada.",
-          variant: "destructive",
-        });
+        console.error("Configuração do Mercado Pago não encontrada");
+        setConfigError(true);
         setIsLoading(false);
         return;
       }
@@ -117,11 +117,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       setIsLoading(false);
     } catch (error) {
       console.error('Error initializing Mercado Pago:', error);
-      toast({
-        title: "Erro na inicialização",
-        description: "Ocorreu um erro ao inicializar o Mercado Pago.",
-        variant: "destructive",
-      });
+      setConfigError(true);
       setIsLoading(false);
     }
   };
@@ -134,6 +130,34 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     
     navigate("/sucesso");
   };
+
+  if (configError) {
+    return (
+      <div className="flex flex-col space-y-6">
+        <Alert variant="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Configuração necessária</AlertTitle>
+          <AlertDescription>
+            As credenciais do Mercado Pago não foram configuradas. Por favor, peça ao administrador para configurar 
+            as credenciais na página de configurações administrativas.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-gray-500 mb-4">
+            Para fins de teste, você pode simular um pagamento clicando no botão abaixo:
+          </p>
+          <Button
+            onClick={handleManualCheckout}
+            variant="default"
+            className="w-full bg-barber-accent"
+          >
+            [Simulação] Confirmar Pagamento
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col space-y-6">

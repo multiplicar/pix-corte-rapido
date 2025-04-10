@@ -9,14 +9,31 @@ export interface MercadoPagoConfig {
 // Get the stored configuration from localStorage
 export const getMercadoPagoConfig = (): MercadoPagoConfig | null => {
   const savedConfig = localStorage.getItem('mercadoPagoConfig');
-  if (!savedConfig) return null;
+  if (!savedConfig) {
+    console.error('Mercado Pago configuration not found in localStorage');
+    return null;
+  }
   
   try {
-    return JSON.parse(savedConfig) as MercadoPagoConfig;
+    const config = JSON.parse(savedConfig) as MercadoPagoConfig;
+    
+    // Verify that all required fields are present and not empty
+    if (!config.publicKey || !config.accessToken || !config.apiKey) {
+      console.error('Mercado Pago configuration is incomplete - missing required fields');
+      return null;
+    }
+    
+    return config;
   } catch (error) {
     console.error('Error parsing Mercado Pago config:', error);
     return null;
   }
+};
+
+// Function to check if the Mercado Pago configuration is valid
+export const isMercadoPagoConfigured = (): boolean => {
+  const config = getMercadoPagoConfig();
+  return config !== null;
 };
 
 // Function to create a Mercado Pago payment

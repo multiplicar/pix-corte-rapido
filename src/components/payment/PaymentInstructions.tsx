@@ -29,6 +29,9 @@ const PaymentInstructions: React.FC = () => {
           <span className="bg-barber-primary text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2 flex-shrink-0">5</span>
           Após o pagamento, seu agendamento será confirmado automaticamente.
         </p>
+        <p className="text-sm text-amber-600 mt-2">
+          <strong>Nota:</strong> Certifique-se de que o administrador configurou as credenciais do Mercado Pago nas configurações do sistema.
+        </p>
       </div>
     </div>
   );
