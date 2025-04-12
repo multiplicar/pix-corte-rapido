@@ -1,6 +1,18 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { WaitListItem, WaitListItemStatus } from './AppContext';
+import { WaitListItemStatus } from './AppContext';
+
+// Export the WaitListItem interface
+export interface WaitListItem {
+  id: string;
+  nome: string;
+  email?: string;
+  servico: { nome: string; duracao: number; };
+  status: WaitListItemStatus;
+  posicao: number;
+  estimatedTime: number;
+  horaPrevista: string;
+}
 
 interface QueueContextType {
   queue: WaitListItem[];
@@ -98,7 +110,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       posicao: newPosition,
       estimatedTime: estimatedMinutes,
       horaPrevista: horaPrevista.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'waiting' as WaitListItemStatus
+      status: 'waiting'
     };
     
     setQueue(prevQueue => {
