@@ -1,16 +1,19 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { useApp } from "@/contexts/AppContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import AppointmentSummary from "@/components/payment/AppointmentSummary";
 import PaymentInstructions from "@/components/payment/PaymentInstructions";
-import PaymentLoader from "@/components/payment/PaymentLoader";
+import PaymentMethodSelector, { PaymentMethod } from "@/components/payment/PaymentMethodSelector";
 import MercadoPagoCheckout from "@/components/payment/MercadoPagoCheckout";
+import StripeCheckout from "@/components/payment/StripeCheckout";
+import LocalPaymentOption from "@/components/payment/LocalPaymentOption";
 
 const PagamentoPage = () => {
   const { agendamento } = useApp();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   
   if (!agendamento.servico || !agendamento.data || !agendamento.hora || !agendamento.nome || !agendamento.email) {
     return (
@@ -27,12 +30,45 @@ const PagamentoPage = () => {
       </Layout>
     );
   }
+  
+  const renderPaymentMethod = () => {
+    switch (paymentMethod) {
+      case 'pix':
+        return (
+          <>
+            <PaymentInstructions />
+            <MercadoPagoCheckout 
+              servico={agendamento.servico}
+              nome={agendamento.nome}
+              email={agendamento.email}
+            />
+          </>
+        );
+      case 'card':
+        return (
+          <StripeCheckout 
+            servico={agendamento.servico}
+            nome={agendamento.nome}
+            email={agendamento.email}
+          />
+        );
+      case 'local':
+        return (
+          <LocalPaymentOption 
+            servico={agendamento.servico}
+            nome={agendamento.nome}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-12">
         <h1 className="text-3xl font-bold text-center mb-8 text-barber-primary">
-          Pagamento via <span className="text-barber-accent">PIX</span>
+          Pagamento
         </h1>
         
         <div className="max-w-2xl mx-auto">
@@ -44,13 +80,16 @@ const PagamentoPage = () => {
               nome={agendamento.nome}
             />
             
-            <PaymentInstructions />
+            <div className="my-6">
+              <PaymentMethodSelector 
+                onSelect={setPaymentMethod}
+                selected={paymentMethod}
+              />
+            </div>
             
-            <MercadoPagoCheckout 
-              servico={agendamento.servico}
-              nome={agendamento.nome}
-              email={agendamento.email}
-            />
+            <div className="mt-6">
+              {renderPaymentMethod()}
+            </div>
           </div>
         </div>
       </div>

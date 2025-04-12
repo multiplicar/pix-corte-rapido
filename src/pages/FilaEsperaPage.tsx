@@ -6,15 +6,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useApp, WaitListItem } from '@/contexts/AppContext';
 import { Timer, User, Clock, Info } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useQueue, WaitListItem } from '@/contexts/QueueContext';
+import WaitingQueueDisplay from '@/components/queue/WaitingQueueDisplay';
 
 const FilaEsperaPage = () => {
   const [waitId, setWaitId] = useState('');
   const [clientInfo, setClientInfo] = useState<WaitListItem | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const { waitList, getWaitListPosition } = useApp();
+  const { queue } = useQueue();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -33,17 +34,16 @@ const FilaEsperaPage = () => {
         checkWaitListPosition(savedId);
       }
     }
-  }, [waitList]);
+  }, [queue]);
 
   const checkWaitListPosition = (id: string) => {
-    const client = waitList.find(item => item.id === id);
+    const client = queue.find(item => item.id === id);
     
     if (client) {
       setClientInfo(client);
       
       // Calcular tempo estimado baseado na posição
-      // Assumindo que cada cliente leva em média 30 minutos
-      const timeEstimate = (client.posicao - 1) * client.estimatedTime;
+      const timeEstimate = client.estimatedTime;
       setTimeLeft(timeEstimate);
       
       // Salvar ID no localStorage
@@ -90,106 +90,115 @@ const FilaEsperaPage = () => {
   return (
     <Layout>
       <div className="container mx-auto py-10 px-4">
-        <div className="max-w-xl mx-auto">
-          <h1 className="text-3xl font-bold text-barber-primary mb-6">
-            Fila de Espera
-          </h1>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Consultar Posição na Fila</CardTitle>
-              <CardDescription>
-                Informe o código recebido ao entrar na fila de espera
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex space-x-2">
-                <Input
-                  value={waitId}
-                  onChange={(e) => setWaitId(e.target.value)}
-                  placeholder="Código da fila"
-                  className="flex-1"
-                />
-                <Button onClick={handleCheck} className="bg-barber-accent hover:bg-amber-600 text-black">
-                  Consultar
-                </Button>
-              </div>
-              
-              {clientInfo && (
-                <div className="mt-6 space-y-4">
-                  <Alert className="bg-barber-primary/10 border-barber-primary">
-                    <User className="h-4 w-4 text-barber-primary" />
-                    <AlertTitle>Olá, {clientInfo.nome}</AlertTitle>
-                    <AlertDescription>
-                      Você está na fila de espera para {clientInfo.servico.nome}.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="p-4 border rounded-md bg-amber-50">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Timer className="h-5 w-5 text-barber-accent" />
-                      <h3 className="font-semibold text-lg">Sua posição</h3>
-                    </div>
-                    <div className="pl-7">
-                      <p className="text-3xl font-bold text-barber-red">
-                        {clientInfo.posicao}º lugar na fila
-                      </p>
-                      
-                      {clientInfo.posicao === 1 ? (
-                        <p className="mt-2 text-green-600 font-semibold">
-                          É a sua vez! Dirija-se ao barbeiro.
-                        </p>
-                      ) : (
-                        <p className="mt-2">
-                          Há {clientInfo.posicao - 1} {clientInfo.posicao - 1 === 1 ? 'pessoa' : 'pessoas'} na sua frente.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {timeLeft !== null && clientInfo.posicao > 1 && (
-                    <div className="p-4 border rounded-md bg-gray-50">
+        <h1 className="text-3xl font-bold text-barber-primary mb-8 text-center">
+          Fila de Espera Virtual
+        </h1>
+        
+        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Consultar Posição na Fila</CardTitle>
+                <CardDescription>
+                  Informe o código recebido ao entrar na fila de espera
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex space-x-2">
+                  <Input
+                    value={waitId}
+                    onChange={(e) => setWaitId(e.target.value)}
+                    placeholder="Código da fila"
+                    className="flex-1"
+                  />
+                  <Button onClick={handleCheck} className="bg-barber-accent hover:bg-amber-600 text-black">
+                    Consultar
+                  </Button>
+                </div>
+                
+                {clientInfo && (
+                  <div className="mt-6 space-y-4">
+                    <Alert className="bg-barber-primary/10 border-barber-primary">
+                      <User className="h-4 w-4 text-barber-primary" />
+                      <AlertTitle>Olá, {clientInfo.nome}</AlertTitle>
+                      <AlertDescription>
+                        Você está na fila de espera para {clientInfo.servico.nome}.
+                      </AlertDescription>
+                    </Alert>
+                    
+                    <div className="p-4 border rounded-md bg-amber-50">
                       <div className="flex items-center space-x-2 mb-2">
-                        <Clock className="h-5 w-5 text-barber-primary" />
-                        <h3 className="font-semibold text-lg">Tempo estimado</h3>
+                        <Timer className="h-5 w-5 text-barber-accent" />
+                        <h3 className="font-semibold text-lg">Sua posição</h3>
+                      </div>
+                      <div className="pl-7">
+                        <p className="text-3xl font-bold text-barber-red">
+                          {clientInfo.posicao}º lugar na fila
+                        </p>
+                        
+                        {clientInfo.status === 'current' ? (
+                          <p className="mt-2 text-green-600 font-semibold">
+                            É a sua vez! Dirija-se ao barbeiro.
+                          </p>
+                        ) : (
+                          <p className="mt-2">
+                            Há {clientInfo.posicao - 1} {clientInfo.posicao - 1 === 1 ? 'pessoa' : 'pessoas'} na sua frente.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {timeLeft !== null && clientInfo.status === 'waiting' && (
+                      <div className="p-4 border rounded-md bg-gray-50">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Clock className="h-5 w-5 text-barber-primary" />
+                          <h3 className="font-semibold text-lg">Tempo estimado</h3>
+                        </div>
+                        <p className="pl-7">
+                          Aproximadamente {formatTimeEstimate(timeLeft)} de espera
+                        </p>
+                        <p className="pl-7 text-sm text-gray-500 mt-1">
+                          Horário previsto: {clientInfo.horaPrevista}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div className="p-4 border rounded-md bg-blue-50">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Info className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-semibold text-lg">Dica</h3>
                       </div>
                       <p className="pl-7">
-                        Aproximadamente {formatTimeEstimate(timeLeft)} de espera
+                        Guarde seu código de consulta: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{clientInfo.id}</span>
                       </p>
                     </div>
-                  )}
-                  
-                  <div className="p-4 border rounded-md bg-blue-50">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Info className="h-5 w-5 text-blue-600" />
-                      <h3 className="font-semibold text-lg">Dica</h3>
-                    </div>
-                    <p className="pl-7">
-                      Guarde seu código de consulta: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{clientInfo.id}</span>
-                    </p>
                   </div>
-                </div>
-              )}
-              
-              {waitId && !clientInfo && (
-                <Alert className="mt-4 border-red-400 bg-red-50">
-                  <AlertTitle>Código não encontrado</AlertTitle>
-                  <AlertDescription>
-                    Não encontramos nenhum cliente na fila com este código. Verifique e tente novamente.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-            <CardFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/agendar')}
-                className="w-full"
-              >
-                Agendar um horário
-              </Button>
-            </CardFooter>
-          </Card>
+                )}
+                
+                {waitId && !clientInfo && (
+                  <Alert className="mt-4 border-red-400 bg-red-50" variant="destructive">
+                    <AlertTitle>Código não encontrado</AlertTitle>
+                    <AlertDescription>
+                      Não encontramos nenhum cliente na fila com este código. Verifique e tente novamente.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/agendar')}
+                  className="w-full"
+                >
+                  Agendar um horário
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+          
+          <div>
+            <WaitingQueueDisplay />
+          </div>
         </div>
       </div>
     </Layout>
