@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Check, Banknote, Info } from 'lucide-react';
+import { Check, Banknote, Info, Credit, Cash, Wallet } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { useApp } from '@/contexts/AppContext';
 
 interface LocalPaymentOptionProps {
@@ -12,12 +14,15 @@ interface LocalPaymentOptionProps {
   nome?: string;
 }
 
+type PaymentMethod = 'cash' | 'card' | 'other';
+
 const LocalPaymentOption: React.FC<LocalPaymentOptionProps> = ({ servico, nome }) => {
   const navigate = useNavigate();
   const { confirmarAgendamento } = useApp();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('cash');
 
   const handleConfirmAppointment = () => {
-    confirmarAgendamento('local');
+    confirmarAgendamento('local', selectedPaymentMethod);
     navigate('/sucesso');
   };
 
@@ -40,6 +45,48 @@ const LocalPaymentOption: React.FC<LocalPaymentOptionProps> = ({ servico, nome }
               Seu agendamento será confirmado, mas o pagamento deverá ser realizado no momento do atendimento.
             </AlertDescription>
           </Alert>
+          
+          <div>
+            <h3 className="font-medium mb-2">Como deseja pagar?</h3>
+            <RadioGroup 
+              value={selectedPaymentMethod}
+              onValueChange={(value) => setSelectedPaymentMethod(value as PaymentMethod)}
+              className="space-y-3"
+            >
+              <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-gray-50">
+                <RadioGroupItem value="cash" id="cash" />
+                <Label htmlFor="cash" className="flex items-center cursor-pointer">
+                  <Cash className="h-4 w-4 mr-2 text-green-600" />
+                  <div>
+                    <span className="font-medium">Dinheiro</span>
+                    <p className="text-sm text-gray-500">Pague em espécie</p>
+                  </div>
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-gray-50">
+                <RadioGroupItem value="card" id="card" />
+                <Label htmlFor="card" className="flex items-center cursor-pointer">
+                  <Credit className="h-4 w-4 mr-2 text-blue-600" />
+                  <div>
+                    <span className="font-medium">Cartão</span>
+                    <p className="text-sm text-gray-500">Débito ou crédito</p>
+                  </div>
+                </Label>
+              </div>
+              
+              <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-gray-50">
+                <RadioGroupItem value="other" id="other" />
+                <Label htmlFor="other" className="flex items-center cursor-pointer">
+                  <Wallet className="h-4 w-4 mr-2 text-purple-600" />
+                  <div>
+                    <span className="font-medium">Outro método</span>
+                    <p className="text-sm text-gray-500">Transferência ou vale</p>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
           
           <div className="space-y-2">
             <h3 className="font-medium">Informações Importantes:</h3>

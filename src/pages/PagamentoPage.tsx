@@ -10,6 +10,7 @@ import PaymentMethodSelector, { PaymentMethod } from "@/components/payment/Payme
 import MercadoPagoCheckout from "@/components/payment/MercadoPagoCheckout";
 import StripeCheckout from "@/components/payment/StripeCheckout";
 import LocalPaymentOption from "@/components/payment/LocalPaymentOption";
+import WaitingQueueDisplay from "@/components/queue/WaitingQueueDisplay";
 
 const PagamentoPage = () => {
   const { agendamento } = useApp();
@@ -45,6 +46,8 @@ const PagamentoPage = () => {
           </>
         );
       case 'card':
+      case 'paypal':
+      case 'applepay':
         return (
           <StripeCheckout 
             servico={agendamento.servico}
@@ -71,25 +74,31 @@ const PagamentoPage = () => {
           Pagamento
         </h1>
         
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <AppointmentSummary 
-              servico={agendamento.servico}
-              data={agendamento.data}
-              hora={agendamento.hora}
-              nome={agendamento.nome}
-            />
-            
-            <div className="my-6">
-              <PaymentMethodSelector 
-                onSelect={setPaymentMethod}
-                selected={paymentMethod}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <AppointmentSummary 
+                servico={agendamento.servico}
+                data={agendamento.data}
+                hora={agendamento.hora}
+                nome={agendamento.nome}
               />
+              
+              <div className="my-6">
+                <PaymentMethodSelector 
+                  onSelect={setPaymentMethod}
+                  selected={paymentMethod}
+                />
+              </div>
+              
+              <div className="mt-6">
+                {renderPaymentMethod()}
+              </div>
             </div>
-            
-            <div className="mt-6">
-              {renderPaymentMethod()}
-            </div>
+          </div>
+          
+          <div className="lg:col-span-1">
+            <WaitingQueueDisplay />
           </div>
         </div>
       </div>

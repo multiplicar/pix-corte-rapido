@@ -423,7 +423,7 @@ const AdminConfigPage = () => {
                 </CardContent>
                 <CardFooter className="flex flex-col">
                   <p className="text-xs text-muted-foreground mt-4">
-                    <strong>Como obter credenciais:</strong> Acesse sua conta do Stripe, vá para a seção Developers > API Keys 
+                    <strong>Como obter credenciais:</strong> Acesse sua conta do Stripe, vá para a seção Developers &gt; API Keys 
                     para obter suas chaves. Use as chaves de teste para desenvolvimento e as chaves de produção para o ambiente de produção.
                   </p>
                 </CardFooter>

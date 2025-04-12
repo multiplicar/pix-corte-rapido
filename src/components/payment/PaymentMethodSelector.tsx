@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Banknote, QrCode } from 'lucide-react';
+import { CreditCard, Banknote, QrCode, Wallet, CreditCardIcon } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 
-export type PaymentMethod = 'pix' | 'card' | 'local';
+export type PaymentMethod = 'pix' | 'card' | 'local' | 'paypal' | 'applepay';
 
 interface PaymentMethodSelectorProps {
   onSelect: (method: PaymentMethod) => void;
@@ -47,6 +46,28 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ onSelect,
               <div>
                 <p className="font-medium">Cartão de Crédito</p>
                 <p className="text-sm text-gray-500">Pagamento seguro via Stripe</p>
+              </div>
+            </Label>
+          </div>
+          
+          <div className={`flex items-center space-x-2 rounded-lg border p-4 cursor-pointer ${selected === 'paypal' ? 'border-barber-primary bg-barber-primary/5' : 'border-gray-200'}`}>
+            <RadioGroupItem value="paypal" id="paypal" />
+            <Label htmlFor="paypal" className="flex flex-1 items-center gap-2 cursor-pointer">
+              <Wallet className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="font-medium">PayPal</p>
+                <p className="text-sm text-gray-500">Pagamento rápido e seguro</p>
+              </div>
+            </Label>
+          </div>
+          
+          <div className={`flex items-center space-x-2 rounded-lg border p-4 cursor-pointer ${selected === 'applepay' ? 'border-barber-primary bg-barber-primary/5' : 'border-gray-200'}`}>
+            <RadioGroupItem value="applepay" id="applepay" />
+            <Label htmlFor="applepay" className="flex flex-1 items-center gap-2 cursor-pointer">
+              <CreditCardIcon className="h-5 w-5 text-gray-800" />
+              <div>
+                <p className="font-medium">Apple Pay</p>
+                <p className="text-sm text-gray-500">Pagamento rápido com seu iPhone</p>
               </div>
             </Label>
           </div>
