@@ -11,7 +11,7 @@ import { CalendarIcon, Clock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const AgendamentoPage = () => {
-  const { agendamento, setAgendamento } = useApp();
+  const { agendamento, selecionarServico, selecionarDataHora } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -73,12 +73,8 @@ const AgendamentoPage = () => {
       return;
     }
     
-    setAgendamento({
-      ...agendamento,
-      servico: selectedService,
-      data: selectedDate,
-      hora: selectedTime,
-    });
+    selecionarServico(selectedService);
+    selecionarDataHora(selectedDate, selectedTime);
     
     navigate("/confirmar");
   };
@@ -113,7 +109,7 @@ const AgendamentoPage = () => {
                     <div className="flex justify-between items-center mt-1">
                       <span className="text-gray-600 text-sm flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
-                        {servico.duracao} min
+                        {servico.tempo}
                       </span>
                       <span className="font-semibold text-barber-secondary">
                         {formatCurrency(servico.preco)}

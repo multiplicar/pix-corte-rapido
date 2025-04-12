@@ -1,51 +1,76 @@
+
 import { createContext, useState, useContext } from "react";
+import { Servico, servicos } from "@/data/servicos";
+
+// Define WaitListItem type to be used in the app context
+export type WaitListItemStatus = 'waiting' | 'current' | 'done';
+
+export interface WaitListItem {
+  id: string;
+  nome: string;
+  email?: string;
+  servico: {
+    nome: string;
+    duracao: number;
+  };
+  status: WaitListItemStatus;
+  posicao: number;
+  estimatedTime: number;
+  horaPrevista: string;
+}
 
 interface AppContextType {
   agendamento: {
-    servico?: {
-      nome: string;
-      preco: number;
-    };
+    servico?: Servico;
     data?: Date;
     hora?: string;
     nome?: string;
     email?: string;
+    telefone?: string;
+    observacoes?: string;
     formaPagamento?: string;
     metodoPagamento?: string;
   };
-  selecionarServico: (servico: { nome: string; preco: number }) => void;
+  waitList: WaitListItem[];
+  servicos: Servico[];
+  selecionarServico: (servico: Servico) => void;
   selecionarDataHora: (data: Date, hora: string) => void;
-  atualizarDadosCliente: (nome: string, email: string) => void;
+  atualizarDadosCliente: (nome: string, email: string, telefone?: string, observacoes?: string) => void;
   confirmarAgendamento: (formaPagamento: string, metodoPagamento?: string) => void;
-  resetAgendamento: () => void; // Adding the missing method
+  resetAgendamento: () => void;
+  setAgendamento: React.Dispatch<React.SetStateAction<AppContextType['agendamento']>>;
 }
 
 export const AppContext = createContext<AppContextType>({
   agendamento: {},
+  waitList: [],
+  servicos: servicos,
   selecionarServico: () => {},
   selecionarDataHora: () => {},
   atualizarDadosCliente: () => {},
   confirmarAgendamento: () => {},
-  resetAgendamento: () => {}, // Adding the missing method
+  resetAgendamento: () => {},
+  setAgendamento: () => {},
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [agendamento, setAgendamento] = useState<AppContextType['agendamento']>({});
+  const [waitList, setWaitList] = useState<WaitListItem[]>([]);
 
-  const selecionarServico = (servico: { nome: string; preco: number }) => {
-    setAgendamento(prev => ({ ...prev, servico: servico }));
+  const selecionarServico = (servico: Servico) => {
+    setAgendamento(prev => ({ ...prev, servico }));
   };
 
   const selecionarDataHora = (data: Date, hora: string) => {
-    setAgendamento(prev => ({ ...prev, data: data, hora: hora }));
+    setAgendamento(prev => ({ ...prev, data, hora }));
   };
 
-  const atualizarDadosCliente = (nome: string, email: string) => {
-    setAgendamento(prev => ({ ...prev, nome: nome, email: email }));
+  const atualizarDadosCliente = (nome: string, email: string, telefone?: string, observacoes?: string) => {
+    setAgendamento(prev => ({ ...prev, nome, email, telefone, observacoes }));
   };
 
   const confirmarAgendamento = (formaPagamento: string, metodoPagamento?: string) => {
-    setAgendamento(prev => ({ ...prev, formaPagamento: formaPagamento, metodoPagamento: metodoPagamento }));
+    setAgendamento(prev => ({ ...prev, formaPagamento, metodoPagamento }));
   };
 
   const resetAgendamento = () => {
@@ -56,11 +81,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     <AppContext.Provider
       value={{
         agendamento,
+        waitList,
+        servicos,
         selecionarServico,
         selecionarDataHora,
         atualizarDadosCliente,
         confirmarAgendamento,
-        resetAgendamento, // Including the method in the provider value
+        resetAgendamento,
+        setAgendamento,
       }}
     >
       {children}

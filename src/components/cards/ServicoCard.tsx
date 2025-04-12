@@ -1,5 +1,5 @@
 
-import { Servico } from '@/contexts/AppContext';
+import { Servico } from '@/data/servicos';
 import { useNavigate } from 'react-router-dom';
 import { Clock } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
@@ -11,11 +11,11 @@ interface ServicoCardProps {
 }
 
 const ServicoCard = ({ servico }: ServicoCardProps) => {
-  const { setAgendamento } = useApp();
+  const { selecionarServico } = useApp();
   const navigate = useNavigate();
 
   const handleSelect = () => {
-    setAgendamento(prev => ({ ...prev, servico }));
+    selecionarServico(servico);
     navigate('/agendar');
   };
 
@@ -33,7 +33,7 @@ const ServicoCard = ({ servico }: ServicoCardProps) => {
         <p className="text-gray-600 text-sm mb-3">{servico.descricao}</p>
         <div className="flex items-center text-gray-500 mb-4">
           <Clock className="h-4 w-4 mr-1" />
-          <span className="text-sm">{servico.duracao} min</span>
+          <span className="text-sm">{servico.tempo}</span>
         </div>
         <div className="flex justify-between items-center">
           <p className="text-barber-secondary font-bold text-lg">

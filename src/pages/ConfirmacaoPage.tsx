@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 const ConfirmacaoPage = () => {
-  const { agendamento, setAgendamento } = useApp();
+  const { agendamento, atualizarDadosCliente } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -69,13 +69,7 @@ const ConfirmacaoPage = () => {
     }
     
     // Atualizar o estado de agendamento
-    setAgendamento({
-      ...agendamento,
-      nome,
-      telefone,
-      email,
-      observacoes,
-    });
+    atualizarDadosCliente(nome, email, telefone, observacoes);
     
     // Navegar para a página de pagamento
     navigate("/pagamento");
@@ -133,7 +127,7 @@ const ConfirmacaoPage = () => {
                       <div className="flex justify-between items-center mt-1">
                         <span className="text-gray-600 flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          {agendamento.servico.duracao} min
+                          {agendamento.servico.tempo}
                         </span>
                         <span className="font-bold text-barber-secondary">
                           {formatCurrency(agendamento.servico.preco)}

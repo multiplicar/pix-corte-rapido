@@ -1,20 +1,6 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export type WaitListItemStatus = 'waiting' | 'current' | 'done';
-
-export interface WaitListItem {
-  id: string;
-  nome: string;
-  email?: string;
-  servico: {
-    nome: string;
-    duracao: number;
-  };
-  status: WaitListItemStatus;
-  posicao: number;
-  estimatedTime: number;
-  horaPrevista: string;
-}
+import { WaitListItem, WaitListItemStatus } from './AppContext';
 
 interface QueueContextType {
   queue: WaitListItem[];
@@ -112,7 +98,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       posicao: newPosition,
       estimatedTime: estimatedMinutes,
       horaPrevista: horaPrevista.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'waiting'
+      status: 'waiting' as WaitListItemStatus
     };
     
     setQueue(prevQueue => {
@@ -159,8 +145,8 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Update to current
         const finalQueue = updatedQueue.map(item => {
           if (item.id === nextPerson.id) {
-            setCurrentPosition({ ...item, status: 'current' });
-            return { ...item, status: 'current' };
+            setCurrentPosition({ ...item, status: 'current' as WaitListItemStatus });
+            return { ...item, status: 'current' as WaitListItemStatus };
           }
           return item;
         });

@@ -74,7 +74,7 @@ const SucessoPage = () => {
                   <p className="text-sm text-gray-500">Duração</p>
                   <p className="font-medium flex items-center">
                     <Clock className="h-4 w-4 mr-1" />
-                    {agendamento.servico?.duracao} min
+                    {agendamento.servico?.tempo}
                   </p>
                 </div>
               </div>

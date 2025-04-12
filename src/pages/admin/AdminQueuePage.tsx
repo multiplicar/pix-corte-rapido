@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ToastAction } from '@/components/ui/toast';
 import { useToast } from '@/hooks/use-toast';
 import { Check, Plus, UserPlus, UserX, Clock, Timer, ArrowRight } from 'lucide-react';
-import { useQueue, WaitListItem } from '@/contexts/QueueContext';
+import { useQueue, } from '@/contexts/QueueContext';
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 
@@ -42,9 +42,12 @@ const AdminQueuePage = () => {
       return;
     }
     
+    // Extract duration in minutes from the tempo string
+    const duracao = parseInt(selectedService.tempo.match(/\d+/)?.[0] || "30");
+    
     const id = addToQueue(newClient.nome, {
       nome: selectedService.nome,
-      duracao: selectedService.duracao
+      duracao: duracao
     });
     
     toast({
@@ -152,7 +155,7 @@ const AdminQueuePage = () => {
                     <SelectContent>
                       {servicos.map((servico) => (
                         <SelectItem key={servico.id} value={servico.id}>
-                          {servico.nome} ({servico.duracao} min)
+                          {servico.nome} ({servico.tempo})
                         </SelectItem>
                       ))}
                     </SelectContent>
