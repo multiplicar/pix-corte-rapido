@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { WaitListItemStatus } from './AppContext';
 
@@ -110,7 +109,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       posicao: newPosition,
       estimatedTime: estimatedMinutes,
       horaPrevista: horaPrevista.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'waiting'
+      status: 'waiting' as WaitListItemStatus
     };
     
     setQueue(prevQueue => {

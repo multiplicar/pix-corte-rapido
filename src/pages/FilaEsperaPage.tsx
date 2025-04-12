@@ -1,25 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { Timer, User, Clock, Info } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useQueue, WaitListItem } from '@/contexts/QueueContext';
 import WaitingQueueDisplay from '@/components/queue/WaitingQueueDisplay';
+import ClienteLookupForm from '@/components/queue/ClienteLookupForm';
+import ClienteInfoDisplay from '@/components/queue/ClienteInfoDisplay';
 
 const FilaEsperaPage = () => {
   const [waitId, setWaitId] = useState('');
   const [clientInfo, setClientInfo] = useState<WaitListItem | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const { queue } = useQueue();
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
-  // Verifica se há um ID na URL ou localStorage
+  // Check for ID in URL or localStorage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
@@ -42,49 +35,16 @@ const FilaEsperaPage = () => {
     if (client) {
       setClientInfo(client);
       
-      // Calcular tempo estimado baseado na posição
+      // Calculate estimated time based on position
       const timeEstimate = client.estimatedTime;
       setTimeLeft(timeEstimate);
       
-      // Salvar ID no localStorage
+      // Save ID to localStorage
       localStorage.setItem('waitListId', id);
     } else {
       setClientInfo(null);
       setTimeLeft(null);
     }
-  };
-
-  const handleCheck = () => {
-    if (!waitId.trim()) {
-      toast({
-        title: "ID não informado",
-        description: "Por favor, informe o código da fila de espera.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    checkWaitListPosition(waitId);
-    
-    if (!clientInfo) {
-      toast({
-        title: "Código não encontrado",
-        description: "O código informado não está na fila de espera.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Formatar o tempo estimado
-  const formatTimeEstimate = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} minutos`;
-    }
-    
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    
-    return `${hours} ${hours === 1 ? 'hora' : 'horas'}${mins > 0 ? ` e ${mins} minutos` : ''}`;
   };
 
   return (
@@ -96,104 +56,19 @@ const FilaEsperaPage = () => {
         
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
           <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Consultar Posição na Fila</CardTitle>
-                <CardDescription>
-                  Informe o código recebido ao entrar na fila de espera
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex space-x-2">
-                  <Input
-                    value={waitId}
-                    onChange={(e) => setWaitId(e.target.value)}
-                    placeholder="Código da fila"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleCheck} className="bg-barber-accent hover:bg-amber-600 text-black">
-                    Consultar
-                  </Button>
-                </div>
-                
-                {clientInfo && (
-                  <div className="mt-6 space-y-4">
-                    <Alert className="bg-barber-primary/10 border-barber-primary">
-                      <User className="h-4 w-4 text-barber-primary" />
-                      <AlertTitle>Olá, {clientInfo.nome}</AlertTitle>
-                      <AlertDescription>
-                        Você está na fila de espera para {clientInfo.servico.nome}.
-                      </AlertDescription>
-                    </Alert>
-                    
-                    <div className="p-4 border rounded-md bg-amber-50">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Timer className="h-5 w-5 text-barber-accent" />
-                        <h3 className="font-semibold text-lg">Sua posição</h3>
-                      </div>
-                      <div className="pl-7">
-                        <p className="text-3xl font-bold text-barber-red">
-                          {clientInfo.posicao}º lugar na fila
-                        </p>
-                        
-                        {clientInfo.status === 'current' ? (
-                          <p className="mt-2 text-green-600 font-semibold">
-                            É a sua vez! Dirija-se ao barbeiro.
-                          </p>
-                        ) : (
-                          <p className="mt-2">
-                            Há {clientInfo.posicao - 1} {clientInfo.posicao - 1 === 1 ? 'pessoa' : 'pessoas'} na sua frente.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {timeLeft !== null && clientInfo.status === 'waiting' && (
-                      <div className="p-4 border rounded-md bg-gray-50">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Clock className="h-5 w-5 text-barber-primary" />
-                          <h3 className="font-semibold text-lg">Tempo estimado</h3>
-                        </div>
-                        <p className="pl-7">
-                          Aproximadamente {formatTimeEstimate(timeLeft)} de espera
-                        </p>
-                        <p className="pl-7 text-sm text-gray-500 mt-1">
-                          Horário previsto: {clientInfo.horaPrevista}
-                        </p>
-                      </div>
-                    )}
-                    
-                    <div className="p-4 border rounded-md bg-blue-50">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Info className="h-5 w-5 text-blue-600" />
-                        <h3 className="font-semibold text-lg">Dica</h3>
-                      </div>
-                      <p className="pl-7">
-                        Guarde seu código de consulta: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{clientInfo.id}</span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                {waitId && !clientInfo && (
-                  <Alert className="mt-4 border-red-400 bg-red-50" variant="destructive">
-                    <AlertTitle>Código não encontrado</AlertTitle>
-                    <AlertDescription>
-                      Não encontramos nenhum cliente na fila com este código. Verifique e tente novamente.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/agendar')}
-                  className="w-full"
-                >
-                  Agendar um horário
-                </Button>
-              </CardFooter>
-            </Card>
+            <ClienteLookupForm 
+              waitId={waitId}
+              setWaitId={setWaitId}
+              clientInfo={clientInfo}
+              checkWaitListPosition={checkWaitListPosition}
+            />
+            
+            {clientInfo && (
+              <ClienteInfoDisplay 
+                clientInfo={clientInfo}
+                timeLeft={timeLeft}
+              />
+            )}
           </div>
           
           <div>
