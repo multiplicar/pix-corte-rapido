@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Check, Banknote, Info, Credit, Cash, Wallet } from 'lucide-react';
+import { Check, Banknote, Info, CreditCard, Wallet } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -56,7 +56,7 @@ const LocalPaymentOption: React.FC<LocalPaymentOptionProps> = ({ servico, nome }
               <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-gray-50">
                 <RadioGroupItem value="cash" id="cash" />
                 <Label htmlFor="cash" className="flex items-center cursor-pointer">
-                  <Cash className="h-4 w-4 mr-2 text-green-600" />
+                  <Banknote className="h-4 w-4 mr-2 text-green-600" />
                   <div>
                     <span className="font-medium">Dinheiro</span>
                     <p className="text-sm text-gray-500">Pague em espécie</p>
@@ -67,7 +67,7 @@ const LocalPaymentOption: React.FC<LocalPaymentOptionProps> = ({ servico, nome }
               <div className="flex items-center space-x-2 border p-3 rounded-md cursor-pointer hover:bg-gray-50">
                 <RadioGroupItem value="card" id="card" />
                 <Label htmlFor="card" className="flex items-center cursor-pointer">
-                  <Credit className="h-4 w-4 mr-2 text-blue-600" />
+                  <CreditCard className="h-4 w-4 mr-2 text-blue-600" />
                   <div>
                     <span className="font-medium">Cartão</span>
                     <p className="text-sm text-gray-500">Débito ou crédito</p>

@@ -1,17 +1,19 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type WaitListItemStatus = 'waiting' | 'current' | 'done';
 
 export interface WaitListItem {
   id: string;
   nome: string;
+  email?: string;
   servico: {
     nome: string;
     duracao: number;
   };
+  status: WaitListItemStatus;
   posicao: number;
   estimatedTime: number;
   horaPrevista: string;
-  status: 'waiting' | 'current' | 'done';
 }
 
 interface QueueContextType {
@@ -146,7 +148,7 @@ export const QueueProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Mark current as done
       const updatedQueue = prevQueue.map(item => {
         if (item.status === 'current') {
-          return { ...item, status: 'done' };
+          return { ...item, status: 'done' as WaitListItemStatus };
         }
         return item;
       });
