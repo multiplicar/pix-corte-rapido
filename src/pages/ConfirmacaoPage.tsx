@@ -19,9 +19,19 @@ const ConfirmacaoPage = () => {
   const [telefone, setTelefone] = useState(agendamento.telefone || "");
   const [incompleteInfo, setIncompleteInfo] = useState(false);
   
+  // Log para verificar as informações do agendamento
+  console.log("Agendamento:", {
+    servico: agendamento.servico,
+    data: agendamento.data,
+    hora: agendamento.hora,
+    nome: agendamento.nome,
+    telefone: agendamento.telefone
+  });
+  
   useEffect(() => {
     // Verificar se tem serviço e data selecionados
     if (!agendamento.servico || !agendamento.data || !agendamento.hora) {
+      console.log("Informações incompletas detectadas");
       setIncompleteInfo(true);
       toast({
         title: "Informações incompletas",
@@ -29,6 +39,7 @@ const ConfirmacaoPage = () => {
         variant: "destructive",
       });
     } else {
+      console.log("Informações do agendamento completas");
       setIncompleteInfo(false);
     }
   }, [agendamento, toast]);
