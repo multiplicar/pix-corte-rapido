@@ -6,6 +6,9 @@ import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/components/ui/use-toast";
 import AppointmentSummary from "@/components/confirmation/AppointmentSummary";
 import CustomerForm from "@/components/confirmation/CustomerForm";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ConfirmacaoPage = () => {
   const { agendamento, atualizarDadosCliente, buscarClientePorTelefone } = useApp();
@@ -14,18 +17,21 @@ const ConfirmacaoPage = () => {
   
   const [nome, setNome] = useState(agendamento.nome || "");
   const [telefone, setTelefone] = useState(agendamento.telefone || "");
+  const [incompleteInfo, setIncompleteInfo] = useState(false);
   
   useEffect(() => {
     // Verificar se tem serviço e data selecionados
     if (!agendamento.servico || !agendamento.data || !agendamento.hora) {
+      setIncompleteInfo(true);
       toast({
         title: "Informações incompletas",
         description: "Por favor, selecione o serviço, data e horário primeiro.",
         variant: "destructive",
       });
-      navigate("/agendar");
+    } else {
+      setIncompleteInfo(false);
     }
-  }, [agendamento, navigate, toast]);
+  }, [agendamento, toast]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +64,33 @@ const ConfirmacaoPage = () => {
     // Navegar para a página de pagamento
     navigate("/pagamento");
   };
+  
+  // Se as informações estiverem incompletas, mostrar mensagem e botão para voltar
+  if (incompleteInfo) {
+    return (
+      <Layout>
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+            <Alert variant="destructive" className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Atenção</AlertTitle>
+              <AlertDescription>
+                Informações de agendamento incompletas. Por favor, retorne e complete todas as etapas.
+              </AlertDescription>
+            </Alert>
+            
+            <Button
+              onClick={() => navigate("/agendar")}
+              className="w-full mt-4"
+              variant="outline"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" /> Voltar para Agendamento
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
