@@ -5,21 +5,19 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/contexts/AppContext";
 import { formatCurrency } from "@/lib/utils";
-import { CalendarIcon, Clock, ArrowLeft, ArrowRight } from "lucide-react";
+import { CalendarIcon, Clock, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 const ConfirmacaoPage = () => {
-  const { agendamento, atualizarDadosCliente } = useApp();
+  const { agendamento, atualizarDadosCliente, buscarClientePorTelefone } = useApp();
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const [nome, setNome] = useState(agendamento.nome || "");
   const [telefone, setTelefone] = useState(agendamento.telefone || "");
-  const [email, setEmail] = useState(agendamento.email || "");
-  const [observacoes, setObservacoes] = useState(agendamento.observacoes || "");
+  const [buscando, setBuscando] = useState(false);
   
   useEffect(() => {
     // Verificar se tem serviço e data selecionados
@@ -37,21 +35,10 @@ const ConfirmacaoPage = () => {
     e.preventDefault();
     
     // Validação básica
-    if (!nome || !telefone || !email) {
+    if (!nome || !telefone) {
       toast({
         title: "Preencha os campos obrigatórios",
-        description: "Nome, telefone e e-mail são obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({
-        title: "E-mail inválido",
-        description: "Por favor, insira um e-mail válido.",
+        description: "Nome e telefone são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -69,7 +56,8 @@ const ConfirmacaoPage = () => {
     }
     
     // Atualizar o estado de agendamento
-    atualizarDadosCliente(nome, email, telefone, observacoes);
+    // Usamos uma string vazia como email para manter a compatibilidade
+    atualizarDadosCliente(nome, "", telefone);
     
     // Navegar para a página de pagamento
     navigate("/pagamento");
@@ -101,6 +89,27 @@ const ConfirmacaoPage = () => {
     }
     
     return formatted;
+  };
+  
+  const handleTelefoneChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedPhone = formatPhoneInput(e.target.value);
+    setTelefone(formattedPhone);
+    
+    // Buscar cliente se o telefone estiver completo
+    if (formattedPhone.length === 14 || formattedPhone.length === 15) {
+      setBuscando(true);
+      const cliente = await buscarClientePorTelefone(formattedPhone);
+      
+      if (cliente) {
+        setNome(cliente.nome);
+        toast({
+          title: "Cliente encontrado",
+          description: `Bem-vindo de volta, ${cliente.nome}!`,
+        });
+      }
+      
+      setBuscando(false);
+    }
   };
   
   return (
@@ -158,13 +167,34 @@ const ConfirmacaoPage = () => {
               </div>
             </div>
             
-            {/* Formulário de dados pessoais */}
+            {/* Formulário de dados pessoais simplificado */}
             <div className="md:col-span-2">
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-6">Seus Dados</h2>
                 
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="telefone">Telefone *</Label>
+                      <div className="relative">
+                        <Input
+                          id="telefone"
+                          value={telefone}
+                          onChange={handleTelefoneChange}
+                          placeholder="(99) 99999-9999"
+                          required
+                        />
+                        {buscando && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="h-4 w-4 animate-spin text-barber-secondary" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Digite seu telefone para buscar seus dados
+                      </p>
+                    </div>
+                    
                     <div>
                       <Label htmlFor="nome">Nome completo *</Label>
                       <Input
@@ -173,42 +203,6 @@ const ConfirmacaoPage = () => {
                         onChange={(e) => setNome(e.target.value)}
                         placeholder="Seu nome completo"
                         required
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="telefone">Telefone *</Label>
-                      <Input
-                        id="telefone"
-                        value={telefone}
-                        onChange={(e) =>
-                          setTelefone(formatPhoneInput(e.target.value))
-                        }
-                        placeholder="(99) 99999-9999"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="email">E-mail *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="seu@email.com"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="observacoes">Observações (opcional)</Label>
-                      <Textarea
-                        id="observacoes"
-                        value={observacoes}
-                        onChange={(e) => setObservacoes(e.target.value)}
-                        placeholder="Alguma informação adicional para o barbeiro?"
-                        rows={4}
                       />
                     </div>
                   </div>

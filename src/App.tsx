@@ -18,6 +18,7 @@ import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminServicosPage from "./pages/admin/AdminServicosPage";
 import AdminAgendamentosPage from "./pages/admin/AdminAgendamentosPage";
+import AdminClientesPage from "./pages/admin/AdminClientesPage";
 import AdminConfigPage from "./pages/admin/AdminConfigPage";
 import AdminQueuePage from "./pages/admin/AdminQueuePage";
 import { AppProvider } from "./contexts/AppContext";
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/servicos" element={<AdminServicosPage />} />
               <Route path="/admin/agendamentos" element={<AdminAgendamentosPage />} />
+              <Route path="/admin/clientes" element={<AdminClientesPage />} />
               <Route path="/admin/config" element={<AdminConfigPage />} />
               <Route path="/admin/fila" element={<AdminQueuePage />} />
               

@@ -7,28 +7,11 @@ import {
   Users, 
   Scissors, 
   DollarSign, 
-  UserPlus, 
-  Mail, 
-  Phone
+  UserPlus
 } from 'lucide-react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-
-// Dados simulados para exemplificar a implementação
-const MOCK_USERS = [
-  { id: 1, nome: 'João Silva', email: 'joao@email.com', telefone: '(11) 99999-1111', dataCadastro: '2023-10-15' },
-  { id: 2, nome: 'Maria Oliveira', email: 'maria@email.com', telefone: '(11) 99999-2222', dataCadastro: '2023-11-20' },
-  { id: 3, nome: 'Pedro Santos', email: 'pedro@email.com', telefone: '(11) 99999-3333', dataCadastro: '2023-12-05' },
-  { id: 4, nome: 'Ana Souza', email: 'ana@email.com', telefone: '(11) 99999-4444', dataCadastro: '2024-01-10' },
-  { id: 5, nome: 'Carlos Mendes', email: 'carlos@email.com', telefone: '(11) 99999-5555', dataCadastro: '2024-02-15' },
-];
+import { useApp } from '@/contexts/AppContext';
+import ClientesRecentes from '@/components/admin/ClientesRecentes';
 
 // Dados simulados para estatísticas do dashboard
 const ESTATISTICAS = {
@@ -43,7 +26,7 @@ const ESTATISTICAS = {
 };
 
 const AdminDashboardPage = () => {
-  const [users, setUsers] = useState(MOCK_USERS);
+  const { clientes, agendamentos } = useApp();
   const [estatisticas, setEstatisticas] = useState(ESTATISTICAS);
   const { toast } = useToast();
   
@@ -54,6 +37,12 @@ const AdminDashboardPage = () => {
       try {
         // Aqui seria uma chamada real à API
         console.log('Carregando dados reais da API/banco...');
+        
+        // Atualizar estatísticas com base nos dados reais
+        setEstatisticas(prev => ({
+          ...prev,
+          novosClientes: clientes.length,
+        }));
         
         // Dados simulados carregados com sucesso
         toast({
@@ -75,7 +64,7 @@ const AdminDashboardPage = () => {
     const intervalo = setInterval(carregarDados, 300000); // Atualiza a cada 5 minutos
     
     return () => clearInterval(intervalo);
-  }, [toast]);
+  }, [toast, clientes]);
   
   // Formatar número como dinheiro (R$)
   const formatarMoeda = (valor: number) => {
@@ -83,12 +72,6 @@ const AdminDashboardPage = () => {
       style: 'currency',
       currency: 'BRL',
     });
-  };
-  
-  // Formatar data
-  const formatarData = (dataString: string) => {
-    const data = new Date(dataString);
-    return data.toLocaleDateString('pt-BR');
   };
 
   return (
@@ -113,11 +96,11 @@ const AdminDashboardPage = () => {
           
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Novos Clientes</CardTitle>
+              <CardTitle className="text-sm font-medium">Clientes Cadastrados</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{estatisticas.novosClientes}</div>
+              <div className="text-2xl font-bold">{clientes.length}</div>
               <p className="text-xs text-muted-foreground">
                 +{estatisticas.percentualNovosMes}% este mês
               </p>
@@ -150,51 +133,6 @@ const AdminDashboardPage = () => {
             </CardContent>
           </Card>
         </div>
-        
-        {/* Seção de Usuários Cadastrados */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl">Usuários Cadastrados</CardTitle>
-                <CardDescription>Lista de clientes registrados no sistema</CardDescription>
-              </div>
-              <div className="rounded-full bg-barber-primary/10 p-2">
-                <UserPlus className="h-5 w-5 text-barber-primary" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Data de Cadastro</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.nome}</TableCell>
-                    <TableCell className="flex items-center">
-                      <Mail className="mr-1 h-3.5 w-3.5 text-gray-500" />
-                      {user.email}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Phone className="mr-1 h-3.5 w-3.5 text-gray-500" />
-                        {user.telefone}
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatarData(user.dataCadastro)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
@@ -239,30 +177,52 @@ const AdminDashboardPage = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Serviços Mais Populares</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">Corte Completo</p>
-                  <p className="font-medium">42%</p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">Corte + Barba</p>
-                  <p className="font-medium">28%</p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">Barba</p>
-                  <p className="font-medium">15%</p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">Outros</p>
-                  <p className="font-medium">15%</p>
+              <div className="flex items-center justify-between">
+                <CardTitle>Clientes Recentes</CardTitle>
+                <div className="rounded-full bg-barber-primary/10 p-2">
+                  <UserPlus className="h-4 w-4 text-barber-primary" />
                 </div>
               </div>
+            </CardHeader>
+            <CardContent>
+              <ClientesRecentes />
             </CardContent>
           </Card>
         </div>
+        
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Serviços Mais Populares</CardTitle>
+                <CardDescription>Análise dos serviços mais requisitados</CardDescription>
+              </div>
+              <div className="rounded-full bg-barber-primary/10 p-2">
+                <Scissors className="h-5 w-5 text-barber-primary" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Corte Completo</p>
+                <p className="font-medium">42%</p>
+              </div>
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Corte + Barba</p>
+                <p className="font-medium">28%</p>
+              </div>
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Barba</p>
+                <p className="font-medium">15%</p>
+              </div>
+              <div className="flex justify-between items-center">
+                <p className="font-medium">Outros</p>
+                <p className="font-medium">15%</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   );

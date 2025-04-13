@@ -1,6 +1,6 @@
 
 import { Link, useNavigate } from 'react-router-dom';
-import { Scissors, LogOut } from 'lucide-react';
+import { Scissors, LogOut, Users } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -30,6 +30,9 @@ const AdminHeader = () => {
           </Link>
           <Link to="/admin/agendamentos" className="hover:text-barber-accent transition-colors">
             Agendamentos
+          </Link>
+          <Link to="/admin/clientes" className="hover:text-barber-accent transition-colors">
+            Clientes
           </Link>
           <Link to="/admin/config" className="hover:text-barber-accent transition-colors">
             Configurações
