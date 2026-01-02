@@ -16,7 +16,7 @@ const PagamentoPage = () => {
   const { agendamento } = useApp();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   
-  if (!agendamento.servico || !agendamento.data || !agendamento.hora || !agendamento.nome || !agendamento.email) {
+  if (!agendamento.servico || !agendamento.data || !agendamento.hora || !agendamento.nome || !agendamento.telefone) {
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
