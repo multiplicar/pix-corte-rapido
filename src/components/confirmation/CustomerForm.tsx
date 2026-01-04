@@ -21,7 +21,7 @@ interface CustomerFormProps {
 }
 
 // Número do WhatsApp da barbearia (formato: 55 + DDD + número)
-const WHATSAPP_BARBEARIA = "5511999999999";
+const WHATSAPP_BARBEARIA = "5521991492816";
 
 const CustomerForm = ({
   nome,
