@@ -130,6 +130,9 @@ const ConfirmacaoPage = () => {
                 setTelefone={setTelefone}
                 onSubmit={handleSubmit}
                 buscarClientePorTelefone={buscarClientePorTelefone}
+                servico={agendamento.servico}
+                data={agendamento.data}
+                hora={agendamento.hora}
               />
             </div>
           </div>
