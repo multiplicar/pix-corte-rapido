@@ -89,7 +89,8 @@ Aguardo confirmação! 🙏`;
     const mensagemCodificada = encodeURIComponent(mensagem);
     const urlWhatsApp = `https://wa.me/${WHATSAPP_BARBEARIA}?text=${mensagemCodificada}`;
     
-    window.open(urlWhatsApp, '_blank');
+    // Redireciona diretamente (funciona melhor fora do iframe de preview)
+    window.location.href = urlWhatsApp;
   };
   
   const formatPhoneInput = (value: string) => {
