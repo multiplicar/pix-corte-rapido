@@ -1,12 +1,12 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, MessageCircle } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { Cliente } from "@/contexts/AppContext";
-import { Servico } from "@/data/servicos";
 
 interface CustomerFormProps {
   nome: string;
@@ -15,13 +15,7 @@ interface CustomerFormProps {
   setTelefone: (telefone: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   buscarClientePorTelefone: (telefone: string) => Promise<Cliente | null>;
-  servico?: Servico;
-  data?: Date;
-  hora?: string;
 }
-
-// Número do WhatsApp da barbearia (formato: 55 + DDD + número)
-const WHATSAPP_BARBEARIA = "5521991492816";
 
 const CustomerForm = ({
   nome,
@@ -29,69 +23,11 @@ const CustomerForm = ({
   setNome,
   setTelefone,
   onSubmit,
-  buscarClientePorTelefone,
-  servico,
-  data,
-  hora
+  buscarClientePorTelefone
 }: CustomerFormProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [buscando, setBuscando] = useState(false);
-
-  const formatarData = (data: Date) => {
-    return data.toLocaleDateString('pt-BR', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric'
-    });
-  };
-
-  const handleEnviarWhatsApp = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validação básica
-    if (!nome || !telefone) {
-      toast({
-        title: "Preencha os campos obrigatórios",
-        description: "Nome e telefone são obrigatórios.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Phone validation
-    const phoneRegex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
-    if (!phoneRegex.test(telefone)) {
-      toast({
-        title: "Telefone inválido",
-        description: "Use o formato (99) 99999-9999 ou (99) 9999-9999.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Chamar onSubmit para salvar dados do cliente
-    onSubmit(e);
-
-    // Montar mensagem para WhatsApp
-    const mensagem = `Olá! Gostaria de agendar:
-
-📋 *Serviço:* ${servico?.nome || 'Não especificado'}
-📅 *Data:* ${data ? formatarData(data) : 'Não especificada'}
-⏰ *Horário:* ${hora || 'Não especificado'}
-💰 *Valor:* R$ ${servico?.preco?.toFixed(2) || '0,00'}
-
-👤 *Nome:* ${nome}
-📱 *Telefone:* ${telefone}
-
-Aguardo confirmação! 🙏`;
-
-    const mensagemCodificada = encodeURIComponent(mensagem);
-    const urlWhatsApp = `https://wa.me/${WHATSAPP_BARBEARIA}?text=${mensagemCodificada}`;
-    
-    // Redireciona diretamente (funciona melhor fora do iframe de preview)
-    window.location.href = urlWhatsApp;
-  };
   
   const formatPhoneInput = (value: string) => {
     // Remove non-numeric characters
@@ -146,7 +82,7 @@ Aguardo confirmação! 🙏`;
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold mb-6">Seus Dados</h2>
       
-      <form onSubmit={handleEnviarWhatsApp}>
+      <form onSubmit={onSubmit}>
         <div className="space-y-4">
           <div>
             <Label htmlFor="telefone">Telefone *</Label>
@@ -184,11 +120,10 @@ Aguardo confirmação! 🙏`;
         <div className="mt-8">
           <Button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            className="w-full bg-barber-accent hover:bg-amber-600 text-black"
             size="lg"
           >
-            <MessageCircle className="h-5 w-5 mr-2" />
-            Enviar para WhatsApp da Barbearia
+            Prosseguir para Pagamento <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </form>
